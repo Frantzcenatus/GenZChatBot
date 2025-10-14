@@ -1,6 +1,6 @@
-# Gen Z Chatbot with Streamlit
+# Gen Z Chatbot
 
-A chatbot built with Streamlit and Google Gemini AI that translates responses into Gen Z slang. Ask any question and get answers delivered in authentic Gen Z language.
+A chatbot built with Google Gemini AI that translates responses into Gen Z slang. Ask any question and get answers delivered in authentic Gen Z language.
 
 ## Features
 
