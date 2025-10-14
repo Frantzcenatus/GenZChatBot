@@ -226,7 +226,7 @@ Keep responses helpful and informative while using Gen Z language. Don't be over
 # Footer
 st.markdown("""
     <div class="footer">
-        Powered by Groq AI 🚀 | Built with Streamlit<br>
+        Powered by Groq AI 🚀 | Built by Ousman Bah<br>
         <small>Keep it real, keep it Gen Z 💯</small>
     </div>
 """, unsafe_allow_html=True)
