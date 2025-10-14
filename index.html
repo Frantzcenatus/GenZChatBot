@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gen Z Chatbot</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #1a1a2e 0%,
+          #16213e 50%,
+          #0f3460 100%
+        );
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        color: white;
+      }
+
+      .header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        margin: 24px;
+        padding: 32px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+      }
+
+      .header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        color: #a8b2d1;
+        font-size: 1.1rem;
+      }
+
+      .chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 24px 150px 24px;
+      }
+
+      .messages {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .message {
+        display: flex;
+        margin-bottom: 16px;
+      }
+
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .message.assistant {
+        justify-content: flex-start;
+      }
+
+      .message-content {
+        max-width: 75%;
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: start;
+        gap: 12px;
+      }
+
+      .message.user .message-content {
+        background: #2563eb;
+      }
+
+      .message.assistant .message-content {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .message-icon {
+        font-size: 24px;
+        min-width: 24px;
+      }
+
+      .message-text {
+        padding-top: 4px;
+        white-space: pre-wrap;
+        line-height: 1.6;
+      }
+
+      .loading {
+        display: none;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .loading.active {
+        display: flex;
+      }
+
+      .loading-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: #60a5fa;
+        border-radius: 50%;
+        animation: bounce 1s infinite;
+      }
+
+      .dot:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+
+      .dot:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .input-area {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, #1a1a2e, transparent);
+        padding: 32px 24px 24px;
+      }
+
+      .input-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      #messageInput {
+        width: 100%;
+        padding: 16px 60px 16px 24px;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(96, 165, 250, 0.3);
+        color: white;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.3s;
+        font-family: inherit;
+      }
+
+      #messageInput::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      #messageInput:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+      }
+
+      #sendButton {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      #sendButton:hover:not(:disabled) {
+        background: #1d4ed8;
+      }
+
+      #sendButton:disabled {
+        background: #4b5563;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .footer {
+        text-align: center;
+        padding: 16px;
+        color: #8892b0;
+        font-size: 14px;
+      }
+
+      @media (max-width: 768px) {
+        .header h1 {
+          font-size: 2rem;
+        }
+
+        .header p {
+          font-size: 1rem;
+        }
+
+        .message-content {
+          max-width: 90%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>💬 Gen Z Chatbot</h1>
+      <p>Your AI homie that speaks the language</p>
+    </div>
+
+    <div class="chat-container">
+      <div class="messages" id="messages">
+        <div class="message assistant">
+          <div class="message-content">
+            <span class="message-icon">🤖</span>
+            <div class="message-text">
+              Yo! I'm your Gen Z chatbot. Ask me anything and I'll hit you back
+              with that Gen Z energy. No cap! 💯
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Type your message here..."
+          autocomplete="off"
+        />
+        <button id="sendButton">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            style="width: 20px; height: 20px"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="footer">
+      Powered by Groq AI 🚀 | Built with HTML/CSS/JS<br />
+      <small>Keep it real, keep it Gen Z 💯</small>
+    </div>
+
+    <script>
+      const API_KEY =
+        "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";
+
+      const messagesContainer = document.getElementById("messages");
+      const messageInput = document.getElementById("messageInput");
+      const sendButton = document.getElementById("sendButton");
+
+      function addMessage(role, content) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${role}`;
+
+        const icon = role === "user" ? "👤" : "🤖";
+
+        messageDiv.innerHTML = `
+                <div class="message-content">
+                    <span class="message-icon">${icon}</span>
+                    <div class="message-text">${content}</div>
+                </div>
+            `;
+
+        messagesContainer.appendChild(messageDiv);
+        scrollToBottom();
+      }
+
+      function showLoading() {
+        const loadingDiv = document.createElement("div");
+        loadingDiv.id = "loading";
+        loadingDiv.className = "message assistant";
+        loadingDiv.innerHTML = `
+                <div class="message-content">
+                    <span class="message-icon">🤖</span>
+                    <div class="loading active">
+                        <div class="loading-dots">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        messagesContainer.appendChild(loadingDiv);
+        scrollToBottom();
+      }
+
+      function removeLoading() {
+        const loading = document.getElementById("loading");
+        if (loading) loading.remove();
+      }
+
+      function scrollToBottom() {
+        messagesContainer.scrollIntoView({ behavior: "smooth", block: "end" });
+      }
+
+      async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // Add user message
+        addMessage("user", message);
+        messageInput.value = "";
+        sendButton.disabled = true;
+        showLoading();
+
+        try {
+          const response = await fetch(
+            "https://api.groq.com/openai/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${API_KEY}`,
+              },
+              body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a Gen Z chatbot that speaks in Gen Z slang and internet language. Use terms like: no cap, fr fr, bruh, bet, facts, lowkey, highkey, mid, fire, goated, based, cringe, W, L, ratio, cope, touch grass, it's giving, living rent free, understood the assignment, and other Gen Z expressions naturally. Keep responses helpful and informative while using Gen Z language. Don't be over the top - keep it natural and authentic. Use emojis occasionally but don't overdo it.",
+                  },
+                  {
+                    role: "user",
+                    content: message,
+                  },
+                ],
+                temperature: 0.7,
+                max_tokens: 1024,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          removeLoading();
+
+          if (data.error) {
+            addMessage(
+              "assistant",
+              `Bruh, something went wrong 😅\n\nError: ${
+                data.error.message || data.error
+              }`
+            );
+          } else {
+            addMessage("assistant", data.choices[0].message.content);
+          }
+        } catch (error) {
+          removeLoading();
+          addMessage(
+            "assistant",
+            `Bruh, something went wrong 😅\n\nError: ${error.message}`
+          );
+        } finally {
+          sendButton.disabled = false;
+        }
+      }
+
+      // Event listeners
+      sendButton.addEventListener("click", sendMessage);
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
