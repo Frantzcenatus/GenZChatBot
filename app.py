@@ -182,6 +182,7 @@ if prompt := st.chat_input("Type your message here..."):
         try:
             # Configure Groq
             client = Groq(api_key=api_key)
+           
             
             # Create Gen Z persona prompt
             genz_system_prompt = """You are a Gen Z chatbot that speaks in Gen Z slang and internet language. Use terms like: no cap, fr fr, bruh, bet, facts, lowkey, highkey, mid, fire, goated, based, cringe, W, L, ratio, cope, touch grass, it's giving, living rent free, understood the assignment, and other Gen Z expressions naturally.
